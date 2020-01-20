@@ -3,7 +3,7 @@ import cv2
 from matplotlib import colors as clr
 import matplotlib.pylab as plb
 import math
-img = cv2.imread('rgb_01_02_009_04.png')
+img = cv2.imread('rgb_02_03_003_02.png')
 cv2.imshow("origin", img)
 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 ret, thresh = cv2.threshold(gray,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
@@ -11,6 +11,7 @@ ret, thresh = cv2.threshold(gray,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
 # noise removal
 kernel = np.ones((3,3),np.uint8)
 opening = cv2.morphologyEx(thresh,cv2.MORPH_OPEN,kernel, iterations = 2)
+cv2.imwrite('opening.png', opening)
 
 # sure background area
 sure_bg = cv2.dilate(opening,kernel,iterations=3)
@@ -22,7 +23,8 @@ ret, sure_fg = cv2.threshold(dist_transform,0.7*dist_transform.max(),255,0)
 # Finding unknown region
 sure_fg = np.uint8(sure_fg)
 unknown = cv2.subtract(sure_bg,sure_fg)
-cv2.imshow('sure_fg', sure_bg)
+cv2.imwrite('sure_fg.png', sure_fg)
+cv2.imwrite('sure_bg.png', sure_bg)
 
 # Marker labelling
 ret, markers = cv2.connectedComponents(sure_fg)
@@ -43,5 +45,5 @@ img[markers == -1] = [0, 0, 0]
 for i in range(np.max(markers)):
     img[markers == i+1] = [math.floor(x*255) for x in
                            cmaplist[(len(cmaplist) // np.max(markers)) * i]]
-cv2.imshow("result", img)
+cv2.imwrite("result.png", img)
 cv2.waitKey()
